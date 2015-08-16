@@ -2,14 +2,14 @@
 struct InstrumentPattern([bool; 16]);
 
 // For simplicity, assume the drum machine has 4 instruments (kick, snare, closed hat, open hat)
-type MachinePattern = [InstrumentPattern; 4];
+struct MachinePattern([InstrumentPattern; 4]);
 
 fn main() {
     println!("Hello, world!");
 }
 
 impl InstrumentPattern {
-    fn from_u16(num: u16) -> InstrumentPattern {
+    fn from_u16(num: u16) -> Self {
         // This could be a straightforward mapping of bit positions to pattern positions
         // However, to generate more common patterns first, I'm going to map the lowest bits to the
         // 1/4s, then the 1/8s between them, then finally the raminaing 1/16ths
@@ -30,6 +30,17 @@ impl InstrumentPattern {
             ((num & 0x4000) != 0),
             ((num & 0x0080) != 0),  // and
             ((num & 0x8000) != 0),
+        ])
+    }
+}
+
+impl MachinePattern {
+    fn from_u64(num: u64) -> Self {
+        MachinePattern ([
+            InstrumentPattern::from_u16(( num & 0xffff)                    as u16),
+            InstrumentPattern::from_u16(((num & 0xffff0000)         >> 16) as u16),
+            InstrumentPattern::from_u16(((num & 0xffff00000000)     >> 32) as u16),
+            InstrumentPattern::from_u16(((num & 0xffff000000000000) >> 48) as u16),
         ])
     }
 }
