@@ -1,4 +1,5 @@
 mod step_to_midi;
+mod midi_variable_len;
 
 // Each instrument has a 16 note pattern
 struct InstrumentPattern([bool; 16]);
