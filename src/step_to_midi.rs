@@ -23,31 +23,18 @@ struct MidiDataIter<Steps: Iterator<Item=Vec<u8>>> {
     blank_steps: u8
 }
 
-impl<Steps: Iterator<Item=Vec<u8>>> MidiDataIter<Steps> {
-    fn new(step_iter: Steps) -> Self {
-        MidiDataIter::<Steps> {
-            step_iter: step_iter,
-            blank_steps: 0,
-        }
-    }
-}
+fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<u8>> + 'a>(step_iter: Steps)
+    -> Box<Iterator<Item=u8> + 'a> {
 
-// each step produces a Vec of data bytes that can be flatmapped into a midi file
-impl<Steps: Iterator<Item=Vec<u8>>> Iterator for MidiDataIter<Steps> {
-    type Item = Vec<u8>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let this_step = self.step_iter.next();
-
-        // end iteration if there's no new notes and no note off events to output
-
-        if let Some(notes) = this_step {
+    // one giant scan/flat map oparation
+    Box::new(
+        step_iter.scan(0, |blank_steps, notes| {
             let mut midi_data = Vec::<u8>::new();
 
             if !notes.is_empty() {
                 for (i, note) in notes.iter().enumerate() {
                     // differential timestamp - after the first message use 0 for simultaneous
-                    midi_data.push(if i == 0 { self.blank_steps * STEP_TICKS } else { 0 });
+                    midi_data.push(if i == 0 { *blank_steps * STEP_TICKS } else { 0 });
                     // note on message
                     midi_data.push(0x90 | CHANNEL);
                     midi_data.push(*note);
@@ -62,17 +49,14 @@ impl<Steps: Iterator<Item=Vec<u8>>> Iterator for MidiDataIter<Steps> {
                     midi_data.push(*note);
                     midi_data.push(VELOCITY);
                 }
-                self.blank_steps = 0;
+                *blank_steps = 0;
             }
             else {
-                self.blank_steps += 1;
+                *blank_steps += 1;
             }
 
             Some(midi_data)
-        }
-        else {
-            None
-        }
-
-    }
+        })
+        .flat_map(|midi_vec| midi_vec)
+    )
 }
