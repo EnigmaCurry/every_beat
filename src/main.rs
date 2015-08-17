@@ -7,6 +7,12 @@ struct InstrumentPattern([bool; 16]);
 // For simplicity, assume the drum machine has 4 instruments (kick, snare, closed hat, open hat)
 struct MachinePattern([InstrumentPattern; 4]);
 
+// drum note numbers
+const KICK_NOTE: u8 = 36;
+const SNARE_NOTE: u8 = 38;
+const CH_NOTE: u8 = 42;
+const OH_NOTE: u8 = 46;
+
 fn main() {
     println!("Hello, world!");
 }
@@ -68,5 +74,26 @@ impl MachinePattern {
             InstrumentPattern::other_from_u16(((num & 0xffff00000000)     >> 32) as u16),
             InstrumentPattern::other_from_u16(((num & 0xffff000000000000) >> 48) as u16),
         ])
+    }
+
+    fn step_iterator<'a>(&'a self) -> Box<Iterator<Item=Vec<u8>> + 'a> {
+        Box::new(
+            // zip the four patterns together to get an iterator giveing
+            // the status of the 4 notes at each step
+            self.0[0].0.iter()
+            .zip(self.0[1].0.iter())
+            .zip(self.0[2].0.iter())
+            .zip(self.0[3].0.iter())
+            .map(|(((a, b), c), d)| (a, b, c, d))
+            // map the four note statuses to midi note values
+            .map(|(a, b, c, d)| {
+                let mut notes = Vec::with_capacity(4);
+                if *a { notes.push(KICK_NOTE) }
+                if *b { notes.push(SNARE_NOTE) }
+                if *c { notes.push(CH_NOTE) }
+                if *d { notes.push(OH_NOTE) }
+                notes
+            })
+        )
     }
 }
