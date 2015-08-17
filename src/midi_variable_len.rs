@@ -3,12 +3,7 @@ use std::mem;
 pub fn enc(val: usize) -> Vec<u8> {
     // Count how many bytes are needed
     // can only store 7 bits per byte in this scheme
-
-    // start at 1 since at least 1 byte must be output
-    let mut count = 1;
-    while val >> (count * 7) != 0 {
-        count += 1;
-    }
+    let count = ((mem::size_of_val(&val) * 8) - (val.leading_zeros() as usize) + 6) / 7;
 
     (0..count)
     .rev()
