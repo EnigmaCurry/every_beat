@@ -6,18 +6,6 @@ use midi_variable_len;
 const MIDI_SUBDIVISIONS: usize = 96;
 const STEP_TICKS: usize = MIDI_SUBDIVISIONS / 4;
 
-const MIDI_FILE_HEADER: [u8; 14] = [
-    'M' as u8,                          // tag
-    'T' as u8,
-    'h' as u8,
-    'd' as u8,
-    0, 0, 0, 6,                         // lengh
-    0, 0,                               // format
-    0, 1,                               // num tracks
-    (MIDI_SUBDIVISIONS >> 8) as u8,     // divisions
-    (MIDI_SUBDIVISIONS & 0xff) as u8
-];
-
 const CHANNEL: u8 = 0;
 const VELOCITY: u8 = 100;
 
@@ -57,4 +45,47 @@ fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<u8>> + 'a>(step_iter: St
         })
         .flat_map(|midi_vec| midi_vec)
     )
+}
+
+pub fn midi_file<'a, Steps: Iterator<Item=Vec<u8>> + 'a>(step_iter: Steps) -> Vec<u8> {
+    let mut file_data = Vec::new();
+
+    // The midi file header is constant
+    file_data.extend([
+        'M' as u8,                                  // tag
+        'T' as u8,
+        'h' as u8,
+        'd' as u8,
+        0, 0, 0, 6,                                 // lengh
+        0, 0,                                       // format (0 == single track file)
+        0, 1,                                       // num tracks
+        ((MIDI_SUBDIVISIONS >>  8) & 0xff) as u8,   // clock divisions
+        ((MIDI_SUBDIVISIONS)       & 0xff) as u8
+    ].iter());
+
+    // track header
+    file_data.extend([
+        'M' as u8,  // tag
+        'T' as u8,
+        'r' as u8,
+        'k' as u8
+    ].iter());
+    // the track length field needs to be set to the amount of data in the track.
+    // set it to 0 initially and sort it out later
+    let track_len_location = file_data.len();;
+    file_data.extend([
+        0, 0, 0, 0, // lengh
+    ].iter());
+    let total_header_len = file_data.len();
+
+    file_data.extend(map_steps_to_track_data(step_iter));
+
+    let data_len = file_data.len() - total_header_len;
+
+    file_data[track_len_location + 0] = ((data_len >> 24) & 0xff) as u8;
+    file_data[track_len_location + 1] = ((data_len >> 16) & 0xff) as u8;
+    file_data[track_len_location + 2] = ((data_len >>  8) & 0xff) as u8;
+    file_data[track_len_location + 3] = ((data_len)       & 0xff) as u8;
+
+    file_data
 }
