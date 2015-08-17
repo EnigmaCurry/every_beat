@@ -21,11 +21,6 @@ const MIDI_FILE_HEADER: [u8; 14] = [
 const CHANNEL: u8 = 0;
 const VELOCITY: u8 = 100;
 
-struct MidiDataIter<Steps: Iterator<Item=Vec<u8>>> {
-    step_iter: Steps,
-    blank_steps: u8
-}
-
 fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<u8>> + 'a>(step_iter: Steps)
     -> Box<Iterator<Item=u8> + 'a> {
 
