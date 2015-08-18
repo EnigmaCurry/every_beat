@@ -1,3 +1,5 @@
+use note::Note;
+
 // Each instrument has a 16 note pattern
 struct InstrumentPattern([bool; 16]);
 
@@ -71,7 +73,7 @@ impl MachinePattern {
         ])
     }
 
-    pub fn step_iterator<'a>(&'a self) -> Box<Iterator<Item=Vec<(u8, u8)>> + 'a> {
+    pub fn step_iterator<'a>(&'a self) -> Box<Iterator<Item=Vec<Note>> + 'a> {
         Box::new(
             // zip the four patterns together to get an iterator giveing
             // the status of the 4 notes at each step
@@ -83,10 +85,10 @@ impl MachinePattern {
             // map the four note statuses to midi note values
             .map(|(a, b, c, d)| {
                 let mut notes = Vec::with_capacity(4);
-                if *a { notes.push((KICK_NOTE, VELOCITY)) }
-                if *b { notes.push((SNARE_NOTE, VELOCITY)) }
-                if *c { notes.push((CH_NOTE, VELOCITY)) }
-                if *d { notes.push((OH_NOTE, VELOCITY)) }
+                if *a { notes.push(Note::new(KICK_NOTE, VELOCITY)) }
+                if *b { notes.push(Note::new(SNARE_NOTE, VELOCITY)) }
+                if *c { notes.push(Note::new(CH_NOTE, VELOCITY)) }
+                if *d { notes.push(Note::new(OH_NOTE, VELOCITY)) }
                 notes
             })
         )

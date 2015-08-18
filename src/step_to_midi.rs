@@ -1,6 +1,7 @@
 // Generate midi from step data
 // Each step is a list of notes to trigger, repeated notes are retriggered
 
+use note::Note;
 use midi_variable_len;
 
 const MIDI_SUBDIVISIONS: usize = 96;
@@ -8,7 +9,7 @@ const STEP_TICKS: usize = MIDI_SUBDIVISIONS / 4;
 
 const CHANNEL: u8 = 0;
 
-fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<(u8, u8)>> + 'a>(step_iter: Steps)
+fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<Note>> + 'a>(step_iter: Steps)
     -> Box<Iterator<Item=u8> + 'a> {
 
     // one giant scan/flat map oparation
@@ -17,22 +18,22 @@ fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<(u8, u8)>> + 'a>(step_it
             let mut midi_data = Vec::<u8>::new();
 
             if !notes.is_empty() {
-                for (i, &(note, vel)) in notes.iter().enumerate() {
+                for (i, note) in notes.iter().enumerate() {
                     // differential timestamp - after the first message use 0 for simultaneous
                     midi_data.extend(midi_variable_len::enc(if i == 0 { *blank_steps * STEP_TICKS } else { 0 }));
                     // note on message
                     midi_data.push(0x90 | CHANNEL);
-                    midi_data.push(note);
-                    midi_data.push(vel);
+                    midi_data.push(note.pitch);
+                    midi_data.push(note.velocity);
                 }
-                for (i, &(note, vel)) in notes.iter().enumerate() {
+                for (i, note) in notes.iter().enumerate() {
                     // first message is one step after previous, other messages are simultaneous
                     midi_data.extend(midi_variable_len::enc(if i == 0 { STEP_TICKS } else { 0 }));
 
                     // note off message
                     midi_data.push(0x80 | CHANNEL);
-                    midi_data.push(note);
-                    midi_data.push(vel);
+                    midi_data.push(note.pitch);
+                    midi_data.push(note.velocity);
                 }
                 *blank_steps = 0;
             }
@@ -47,7 +48,7 @@ fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<(u8, u8)>> + 'a>(step_it
 }
 
 // notes are expressed as (note number, velocity)
-pub fn midi_file<Steps: Iterator<Item=Vec<(u8, u8)>>>(step_iter: Steps) -> Vec<u8> {
+pub fn midi_file<Steps: Iterator<Item=Vec<Note>>>(step_iter: Steps) -> Vec<u8> {
     let mut file_data = Vec::new();
 
     // The midi file header is constant
