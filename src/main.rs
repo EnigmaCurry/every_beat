@@ -123,10 +123,10 @@ impl InstrumentPattern {
 impl MachinePattern {
     fn from_u64(num: u64) -> Self {
         MachinePattern ([
-            InstrumentPattern::kick_from_u16(  (num & 0xffff)                    as u16),
-            InstrumentPattern::other_from_u16(((num & 0xffff0000)         >> 16) as u16),
+            InstrumentPattern::kick_from_u16 (((num & 0xffff000000000000) >> 48) as u16),
             InstrumentPattern::other_from_u16(((num & 0xffff00000000)     >> 32) as u16),
-            InstrumentPattern::other_from_u16(((num & 0xffff000000000000) >> 48) as u16),
+            InstrumentPattern::other_from_u16(((num & 0xffff0000)         >> 16) as u16),
+            InstrumentPattern::other_from_u16( (num & 0xffff)                    as u16),
         ])
     }
 
