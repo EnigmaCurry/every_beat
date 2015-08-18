@@ -47,7 +47,7 @@ fn map_steps_to_track_data<'a, Steps: Iterator<Item=Vec<u8>> + 'a>(step_iter: St
     )
 }
 
-pub fn midi_file<'a, Steps: Iterator<Item=Vec<u8>> + 'a>(step_iter: Steps) -> Vec<u8> {
+pub fn midi_file<Steps: Iterator<Item=Vec<u8>>>(step_iter: Steps) -> Vec<u8> {
     let mut file_data = Vec::new();
 
     // The midi file header is constant

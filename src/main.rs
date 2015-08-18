@@ -1,6 +1,9 @@
 mod step_to_midi;
 mod midi_variable_len;
 
+use std::fs::File;
+use std::io::Write;
+
 // Each instrument has a 16 note pattern
 struct InstrumentPattern([bool; 16]);
 
@@ -16,10 +19,23 @@ const OH_NOTE: u8 = 46;
 fn main() {
     println!("Hello, world!");
 
-    let start = 1;
+    let outfile = "out.mid";
+    let start = 0x1010101010101010;
     let step = 153;
-    let num_bars = 20;
+    let num_bars: u64 = 20;
 
+    // build a big note sequence
+    let mut note_sequence = Vec::<Vec<u8>>::with_capacity(num_bars as usize * 16);
+    for i in (0..num_bars) {
+        let pattern_num = i.wrapping_mul(step).wrapping_add(start);
+        let current_pattern = MachinePattern::from_u64(pattern_num);
+        note_sequence.extend(current_pattern.step_iterator());
+    }
+
+    // write it out to a midi file
+    let file_data = step_to_midi::midi_file(note_sequence.into_iter());
+    File::create(outfile)
+    .and_then(|mut file| file.write_all(&file_data[..]) );
 }
 
 impl InstrumentPattern {
