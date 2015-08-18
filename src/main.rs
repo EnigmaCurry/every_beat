@@ -20,9 +20,9 @@ fn main() {
     println!("Hello, world!");
 
     let outfile = "out.mid";
-    let start = 0x1010101010101010;
-    let step = 153;
-    let num_bars: u64 = 20;
+    let start = 0;
+    let step = 1;
+    let num_bars: u64 = 8;
 
     // build a big note sequence
     let mut note_sequence = Vec::<Vec<u8>>::with_capacity(num_bars as usize * 16);
@@ -79,7 +79,7 @@ impl InstrumentPattern {
             ((num & 0x0100) != 0),
             ((num & 0x0004) != 0),  // and
             ((num & 0x0200) != 0),
-            ((num & 0x1000) != 0),  // 4
+            ((num & 0x1000) == 0),  // 4
             ((num & 0x0400) != 0),
             ((num & 0x0008) != 0),  // and
             ((num & 0x0800) != 0),
