@@ -10,6 +10,8 @@ const SNARE_NOTE: u8 = 38;
 const CH_NOTE: u8 = 42;
 const OH_NOTE: u8 = 46;
 
+const VELOCITY: u8 = 100;
+
 impl InstrumentPattern {
     fn other_from_u16(num: u16) -> Self {
         // This could be a straightforward mapping of bit positions to pattern positions
@@ -69,7 +71,7 @@ impl MachinePattern {
         ])
     }
 
-    pub fn step_iterator<'a>(&'a self) -> Box<Iterator<Item=Vec<u8>> + 'a> {
+    pub fn step_iterator<'a>(&'a self) -> Box<Iterator<Item=Vec<(u8, u8)>> + 'a> {
         Box::new(
             // zip the four patterns together to get an iterator giveing
             // the status of the 4 notes at each step
@@ -81,10 +83,10 @@ impl MachinePattern {
             // map the four note statuses to midi note values
             .map(|(a, b, c, d)| {
                 let mut notes = Vec::with_capacity(4);
-                if *a { notes.push(KICK_NOTE) }
-                if *b { notes.push(SNARE_NOTE) }
-                if *c { notes.push(CH_NOTE) }
-                if *d { notes.push(OH_NOTE) }
+                if *a { notes.push((KICK_NOTE, VELOCITY)) }
+                if *b { notes.push((SNARE_NOTE, VELOCITY)) }
+                if *c { notes.push((CH_NOTE, VELOCITY)) }
+                if *d { notes.push((OH_NOTE, VELOCITY)) }
                 notes
             })
         )

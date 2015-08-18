@@ -48,7 +48,7 @@ fn main() {
     let num_bars: u64 = args.value_of("NUM_BARS").and_then(|arg_str| arg_str.parse().ok() ).unwrap_or(128);
 
     // build a big note sequence
-    let mut note_sequence = Vec::<Vec<u8>>::with_capacity(num_bars as usize * 16);
+    let mut note_sequence = Vec::<Vec<(u8, u8)>>::with_capacity(num_bars as usize * 16);
     for i in (0..num_bars) {
         let pattern_num = i.wrapping_mul(step).wrapping_add(start);
         let current_pattern = patterns::MachinePattern::from_u64(pattern_num);
