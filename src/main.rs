@@ -15,6 +15,11 @@ const OH_NOTE: u8 = 46;
 
 fn main() {
     println!("Hello, world!");
+
+    let start = 1;
+    let step = 153;
+    let num_bars = 20;
+
 }
 
 impl InstrumentPattern {
