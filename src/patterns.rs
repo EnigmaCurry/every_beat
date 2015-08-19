@@ -15,9 +15,11 @@ const OH_NOTE: u8 = 46;
 const VELOCITY: u8 = 100;
 
 impl InstrumentPattern {
+    // These could be a straightforward mapping of bit positions to pattern positions.
+    // However, to generate more common variations first, I'm going to map the lowest bits to the
+    // 1/4s, then the 1/8s between them, then finally the reminaing 1/16ths. The indiviual
+    // instruments have been set up so that pattern 0 is the Amen break.
     fn kick_from_u16(num: u16) -> Self {
-        // the kick gets its own mappging so that low numbered patterns get a kick at the start of
-        // the bar
         InstrumentPattern ([
             ((num & 0x8000) == 0),  // 1
             ((num & 0x0010) != 0),
@@ -39,9 +41,6 @@ impl InstrumentPattern {
     }
 
     fn snare_from_u16(num: u16) -> Self {
-        // This could be a straightforward mapping of bit positions to pattern positions
-        // However, to generate more common patterns first, I'm going to map the lowest bits to the
-        // 1/4s, then the 1/8s between them, then finally the raminaing 1/16ths
         InstrumentPattern ([
             ((num & 0x0001) != 0),  // 1
             ((num & 0x0100) != 0),
@@ -63,9 +62,6 @@ impl InstrumentPattern {
     }
 
     fn ch_from_u16(num: u16) -> Self {
-        // This could be a straightforward mapping of bit positions to pattern positions
-        // However, to generate more common patterns first, I'm going to map the lowest bits to the
-        // 1/4s, then the 1/8s between them, then finally the raminaing 1/16ths
         InstrumentPattern ([
             ((num & 0x0001) != 0),  // 1
             ((num & 0x0100) == 0),
@@ -87,9 +83,6 @@ impl InstrumentPattern {
     }
 
     fn oh_from_u16(num: u16) -> Self {
-        // This could be a straightforward mapping of bit positions to pattern positions
-        // However, to generate more common patterns first, I'm going to map the lowest bits to the
-        // 1/4s, then the 1/8s between them, then finally the raminaing 1/16ths
         InstrumentPattern ([
             ((num & 0x0001) == 0),  // 1
             ((num & 0x0100) != 0),

@@ -22,8 +22,10 @@ This simplicity has a problem; a direct mapping from integers to sequences makes
 it hard to find musical sounding patterns in the 2^64 possibilities.
 Fortunately, ANY mapping that uses every bit of the input value exactly one will
 still contain all of the 2^64 possible beats. This means that the mapping can be
-chosen for musicality. An easy technique to achieve this is to map pattern
-zero to something good, I've used the Amen break.
+chosen for musicality. The mapping used here puts the major subdivisions of the
+bar on lower bits of the pattern number so that early patterns are more usual
+variations. To get things off to a good start I've mapped pattern zero to the
+Amen break.
 
 # Conversion to midi
 
